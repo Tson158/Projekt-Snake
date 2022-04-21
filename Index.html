@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>-----Projekt Snake-----</title>
+</head>
+<body>
+    
+    <canvas id="canvas" width="700" height="700"></canvas>
+
+    <Script>
+        let canvas = document.getElementById('canvas');
+        let ctx = canvas.getContext('2d');
+        let reihen = 50;
+        let spalten = 50;
+        let schlangenKopf = [
+            {x:40,y:3},
+        ]
+        // let schlange = [
+        //     {x:41,y:3}
+        // ];
+        let futter;
+        let zellenBreite = canvas.width / spalten;
+        let zellenHoehe = canvas.height / reihen;
+        let Bewegung = 'LEFT';
+        let futterSammeln = false;
+
+        platziereFutter()
+
+        setInterval(gameLoop, 200); // Geschwindigkeit
+        document.addEventListener('keydown', keyDown); // Implementiert Tastatur eingabe
+
+        draw()
+        // draw2()
+
+        function draw(){
+            ctx.fillStyle = 'green'; // Spielfeld -- Hintergrund
+            ctx.fillRect(0, 0, canvas.width, canvas.height); // Koordinaten Spielfeld -- Hintergrund 
+            //  X-Achse (html), Y-Achse (html). X-Achse (Spielfeld), Y-Achse Spielfeld
+
+            ctx.fillStyle = 'yellow'; //Kopf
+            add(330, 370);  //Koordinaten Kopf -- function add
+            schlangenKopf.forEach(part => add(part.x, part.y));
+
+            // ctx.fillStyle = 'red'; //Körper
+            // add(350, 370);  //Koordinaten Körper -- function add
+            // add(370, 370);
+            // add(390, 370);
+            // add(410, 370);
+
+            // schlangenKopf.forEach(lastPart => add(lastPart.x, lastPart.y));
+
+
+            ctx.fillStyle = 'red'; // Futter
+            add(futter.x, futter.y); // Koordinaten Futter über 'let'
+
+            requestAnimationFrame(draw);
+        }
+
+        function gameOver(){
+
+            // 1. Beisst sich selbst
+            let firstPart = schlangenKopf[0];
+            let andereParts = schlangenKopf.slice(1);
+            let doppelteParts = andereParts.find(part => part.x == firstPart.x &&
+            part.y == firstPart.y);
+
+            // 2. schlange läuft gg die wand
+            if(schlangenKopf[0].x < 0 ||
+            schlangenKopf[0].x > spalten -1 ||
+            schlangenKopf[0].y < 0 ||
+            schlangenKopf[0].y > reihen -1 ||
+            doppelteParts // Beisst sich selbst
+            )
+            {
+                platziereFutter()
+                schlangenKopf = [
+                    {x:40,y:3}
+                ];
+                Bewegung = 'LEFT';
+            }
+
+
+        }
+
+        // function draw2() {
+        //         ctx.fillStyle = 'red'; //Körper
+        //         add(350, 370);  //Koordinaten Körper -- function add
+        //         // add(370, 370);
+        //         // add(390, 370);
+        //         // add(410, 370);
+        //         schlange.forEach(part => add(part.x, part.y));
+        //         requestAnimationFrame(draw2);
+        //     }
+
+        function platziereFutter(){
+            let randomX = Math.floor (Math.random() * spalten); // floor rundet das ergebnis auf volle zahlen 
+            let randomY = Math.floor (Math.random() * reihen);  // random erzeugt einen zufälligen wert * reihe/spalte und der wert bleibt innerhalb des Spielfeldes
+
+            futter = {x: randomX, y: randomY}; // Platziert das Futter Zufällig
+        }
+
+       
+        function add(x,y){
+            ctx.fillRect(x * zellenBreite, y * zellenHoehe, zellenBreite -1, zellenHoehe -1); 
+        }
+
+        function schlangeWachsen(){
+            for (let i = schlangenKopf.length -1; i > 0; i--) {
+                const part = schlangenKopf[i];
+                const lastPart = schlangenKopf[i - 1];
+                part.x = lastPart.x;
+                part.y = lastPart.y;
+            }
+        }
+
+        function gameLoop(){
+            gameOver();
+            if(futterSammeln){
+                schlangenKopf =[{
+                    x: schlangenKopf[0].x, 
+                    y: schlangenKopf[0].y
+                }, ...schlangenKopf];
+                futterSammeln = false
+            }
+            schlangeWachsen();
+
+
+            if (Bewegung == 'LEFT'){
+                schlangenKopf[0].x--;
+                // schlange[1].x--;
+            }
+
+            if (Bewegung == 'RIGHT'){
+                schlangenKopf[0].x++;
+                // schlange[1].x++;
+            }
+
+            if (Bewegung == 'UP'){
+                schlangenKopf[0].y--;
+                // schlange[1].y--;
+            }
+
+            if (Bewegung == 'DOWN'){
+                schlangenKopf[0].y++;
+                // schlange[1].y++;
+            }
+            if  (schlangenKopf[0].x == futter.x && // wenn koordinaten übereinstimmen --> platiere futter neu
+                schlangenKopf[0].y == futter.y) {
+                    futterSammeln = true; //Futter einsammeln
+                    platziereFutter(); 
+                    // draw2();
+            }
+        }
+
+        function keyDown(e){
+            if (e.keyCode == 37){
+                Bewegung = 'LEFT'
+            }
+            if (e.keyCode == 38){
+                Bewegung = 'UP'
+            }
+            if (e.keyCode == 39){
+                Bewegung = 'RIGHT'
+            }
+            if (e.keyCode == 40){
+                Bewegung = 'DOWN'
+            }
+        }
+
+    </Script>
+
+</body>
+</html>
